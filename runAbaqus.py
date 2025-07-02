@@ -11,7 +11,12 @@ from tkinter import scrolledtext
 root = tk.Tk()
 root.title('Run Abaqus')
 
+process = None
+
 def submit():
+    from subprocess import Popen, PIPE, STDOUT
+    from threading import Thread
+    global process
     cmd = [abaqusVar.get(), 'interactive']
     fullpath = jobVar.get()
     if not os.path.isfile(fullpath):
@@ -36,6 +41,14 @@ def submit():
     if cpus:
         cmd.extend(['cpus=' + cpus])
     text.insert(tk.END, ' '.join(cmd) + '\n')
+    process = Popen(cmd, stdout=PIPE, stderr=STDOUT, shell=True, text=True)
+    Thread(target=readOutput, daemon=True).start()
+
+
+def readOutput():
+    for line in process.stdout:
+        text.insert(tk.END, line)
+    # TODO catch errors
 
 
 
