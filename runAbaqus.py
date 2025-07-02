@@ -41,6 +41,8 @@ def submit():
     if cpus:
         cmd.extend(['cpus=' + cpus])
     text.insert(tk.END, ' '.join(cmd) + '\n')
+    button['text'] = 'Terminate'
+    button['command'] = terminate
     process = Popen(cmd, stdout=PIPE, stderr=STDOUT, shell=True, text=True)
     Thread(target=readOutput, daemon=True).start()
 
@@ -49,7 +51,15 @@ def readOutput():
     for line in process.stdout:
         text.insert(tk.END, line)
     # TODO catch errors
+    button['text'] = 'Submit'
+    button['command'] = submit
 
+
+def terminate():
+    button['text'] = 'Submit'
+    button['command'] = submit
+    if hasattr(process, 'terminate'):
+        process.terminate()
 
 
 row = 0
@@ -142,8 +152,8 @@ ttk.Combobox(root,
     ).grid(column=1, row=row, sticky=(tk.W, tk.E))
 row += 1
 
-button = ttk.Button(text='Submit', command=submit) \
-        .grid(column=1, row=row, sticky=tk.W)
+button = ttk.Button(text='Submit', command=submit)
+button.grid(column=1, row=row, sticky=tk.W)
 row += 1
 
 text = scrolledtext.ScrolledText(root)
