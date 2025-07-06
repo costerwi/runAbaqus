@@ -2,7 +2,6 @@ from __future__ import print_function
 
 from glob import glob
 import os
-from os import path
 import tkinter as tk
 import tkinter.ttk as ttk
 from tkinter import font
@@ -30,21 +29,23 @@ def submit():
     if not os.path.isfile(fullpath):
         showerror(
             title='File not found',
-            message=path.abspath(fullpath),
+            message=os.path.abspath(fullpath),
             )
         return
     if text.index(tk.END) > '3.0':
         text.delete('1.0', tk.END)
-    d, fn = path.split(fullpath)
+    d, fn = os.path.split(fullpath)
     if d and d != os.getcwd():
         text.insert(tk.END, 'cd {}\n'.format(d))
         os.chdir(d)
-    job, _ = path.splitext(fn)
+    job, ext = os.path.splitext(fn)
     cmd = [abaqusVar.get(), 'interactive', 'job=' + job]
-    oldjob, _ = path.splitext(oldjobVar.get())
+    if ext != '.inp':
+        cmd.append('input=' + fn)
+    oldjob, _ = os.path.splitext(oldjobVar.get())
     if oldjob:
         cmd.append('oldjob=' + oldjob)
-    globalmodel, _ = path.splitext(globalVar.get())
+    globalmodel, _ = os.path.splitext(globalVar.get())
     if globalmodel:
         cmd.append('global=' + globalmodel)
     user = userVar.get()
@@ -59,7 +60,6 @@ def submit():
     license = licenseVar.get()
     if 'QXT' in license:
         cmd.append('license_model=LEGACY')
-        cmd.append('license_type=TOKEN')
     elif 'SRU' in license:
         cmd.append('license_model=SIMUNIT')
         cmd.append('license_type=TOKEN')
@@ -89,8 +89,8 @@ def submit():
 def monitorJob():
     """Monitor running process and echo data to scrolledtext"""
     fullpath = jobVar.get()
-    d, fn = path.split(fullpath)
-    job, _ = path.splitext(fn)
+    d, fn = os.path.split(fullpath)
+    job, _ = os.path.splitext(fn)
     with open(job + '.log', 'w') as logfile:
         for line in process.stdout:
             text.insert(tk.END, line)
@@ -156,7 +156,7 @@ def browseJob():
                 ])
     if not fullpath:
         return # cancelled
-    d, fn = path.split(fullpath)
+    d, fn = os.path.split(fullpath)
     text.delete('1.0', tk.END)
     text.insert(tk.END, 'cd {}\n'.format(d))
     text.yview(tk.END)
@@ -168,7 +168,7 @@ def browseOldJob():
             filetypes=[('Abaqus restart files', '.res')])
     if not fullpath:
         return # cancelled
-    d, fn = path.split(fullpath)
+    d, fn = os.path.split(fullpath)
     if d == os.getcwd():
         oldjobVar.set(fn)
     else:
@@ -179,7 +179,7 @@ def browseGlobalJob():
             filetypes=[('Abaqus output files', '.odb')])
     if not fullpath:
         return # cancelled
-    d, fn = path.split(fullpath)
+    d, fn = os.path.split(fullpath)
     if d == os.getcwd():
         globalVar.set(fn)
     else:
@@ -195,7 +195,7 @@ def browseUser():
                 ])
     if not fullpath:
         return # cancel
-    d, fn = path.split(fullpath)
+    d, fn = os.path.split(fullpath)
     if d == os.getcwd():
         userVar.set(fn)
     else:
