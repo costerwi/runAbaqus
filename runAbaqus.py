@@ -12,9 +12,10 @@ from tkinter import scrolledtext
 root = tk.Tk()
 root.title('Run Abaqus')
 
-process = None
+process = None # process running the solver
 
 def submit():
+    """Collect settings and launch abaqus solver"""
     import subprocess
     from tkinter.messagebox import showerror
     from threading import Thread
@@ -22,7 +23,7 @@ def submit():
     fullpath = jobVar.get()
     if not fullpath:
         showerror(
-            title='Missing input file',
+            title='Nothing to run',
             message='You must specify an Abaqus job to run',
             )
         return
@@ -82,10 +83,10 @@ def submit():
         text=True,
         start_new_session=True,
         **options)
-    Thread(target=readOutput, daemon=True).start()
+    Thread(target=monitorJob, daemon=True).start()  # monitor in a non-blocking Thread
 
 
-def readOutput():
+def monitorJob():
     """Monitor running process and echo data to scrolledtext"""
     fullpath = jobVar.get()
     d, fn = path.split(fullpath)
@@ -154,7 +155,7 @@ def browseJob():
                 ('All files', '.*'),
                 ])
     if not fullpath:
-        return # cancel
+        return # cancelled
     d, fn = path.split(fullpath)
     text.delete('1.0', tk.END)
     text.insert(tk.END, 'cd {}\n'.format(d))
@@ -166,7 +167,7 @@ def browseOldJob():
     fullpath = filedialog.askopenfilename(
             filetypes=[('Abaqus restart files', '.res')])
     if not fullpath:
-        return # cancel
+        return # cancelled
     d, fn = path.split(fullpath)
     if d == os.getcwd():
         oldjobVar.set(fn)
@@ -177,7 +178,7 @@ def browseGlobalJob():
     fullpath = filedialog.askopenfilename(
             filetypes=[('Abaqus output files', '.odb')])
     if not fullpath:
-        return # cancel
+        return # cancelled
     d, fn = path.split(fullpath)
     if d == os.getcwd():
         globalVar.set(fn)
