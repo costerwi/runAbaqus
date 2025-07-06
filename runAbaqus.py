@@ -5,6 +5,7 @@ import os
 from os import path
 import tkinter as tk
 import tkinter.ttk as ttk
+from tkinter import font
 from tkinter import filedialog
 from tkinter import scrolledtext
 
@@ -61,17 +62,54 @@ def submit():
 
 
 def readOutput():
-    for line in process.stdout:
-        text.insert(tk.END, line)
-    # TODO catch errors
+    """Monitor running process and echo data to scrolledtext"""
+    fullpath = jobVar.get()
+    d, fn = path.split(fullpath)
+    job, _ = path.splitext(fn)
+    with open(job + '.log', 'w') as logfile:
+        for line in process.stdout:
+            text.insert(tk.END, line)
+            text.yview(tk.END)
+            print(line, file=logfile, flush=True, end='')  # also echo to log file
+    # Process is finished here. Summarize output
+    if os.path.isfile(job + '.sta'):
+        text.insert(tk.END, '\n')
+        with open(job + '.sta') as sta:
+            text.insert(tk.END, '\n{}\n'.format(sta.name), ('h1',))
+            for line in sta:
+                text.insert(tk.END, line)
+                text.yview(tk.END)
+    for ext in '.msg', '.dat':
+        fn = job + ext
+        if not os.path.isfile(fn):
+            continue
+        text.insert(tk.END, '\n')
+        with open(fn) as out:
+            heading = False
+            for line in out:
+                if line.startswith(' ***ERROR:') or line.startswith('           ') and previous:
+                    if not heading:
+                        text.insert(tk.END, '\n{}\n'.format(fn), ('h1',))
+                        heading = True
+                    text.insert(tk.END, line)
+                    text.yview(tk.END)
+                    previous = True
+                else:
+                    previous = False
+        if heading:
+            break
     button['text'] = 'Submit'
     button['command'] = submit
 
 
 def terminate():
-    button['text'] = 'Submit'
-    button['command'] = submit
+    """Kill the running process (if any)"""
+    from signal import CTRL_BREAK_EVENT
     if hasattr(process, 'terminate'):
+        text.insert(tk.END, 'Terminating...')
+        text.yview(tk.END)
+        if os.name == 'nt':
+            process.send_signal(CTRL_BREAK_EVENT)
         process.terminate()
 
 
@@ -99,6 +137,7 @@ def browseJob():
     d, fn = path.split(fullpath)
     text.delete('1.0', tk.END)
     text.insert(tk.END, 'cd {}\n'.format(d))
+    text.yview(tk.END)
     os.chdir(d)
     jobVar.set(fn)
 
@@ -180,6 +219,10 @@ row += 1
 
 text = scrolledtext.ScrolledText(root)
 text.grid(column=1, row=row, sticky=(tk.W, tk.E, tk.N, tk.S))
+h1font = font.nametofont('TkTextFont').actual()
+h1font['size'] = 14
+h1font['weight'] = 'bold'
+text.tag_configure('h1', font=h1font)
 
 root.columnconfigure(1, weight=1)
 root.rowconfigure(row, weight=1)
