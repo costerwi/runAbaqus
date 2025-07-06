@@ -16,11 +16,15 @@ process = None
 
 def submit():
     import subprocess
+    from tkinter.messagebox import showerror
     from threading import Thread
     global process
     fullpath = jobVar.get()
     if not os.path.isfile(fullpath):
-        #TODO Error
+        showerror(
+            title='File not found',
+            message=path.abspath(fullpath),
+            )
         return
     if text.index(tk.END) > '3.0':
         text.delete('1.0', tk.END)
