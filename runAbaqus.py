@@ -52,6 +52,9 @@ def submit():
     cpus = cpusVar.get()
     if cpus:
         cmd.append('cpus=' + cpus)
+    gpus = gpusVar.get()
+    if gpus:
+        cmd.append('gpus=' + gpus)
     license = licenseVar.get()
     if 'QXT' in license:
         cmd.append('license_model=LEGACY')
@@ -134,18 +137,15 @@ def terminate():
         process.terminate()
 
 
-row = 0
 def addFileRow(name, desc, command):
-    global row
-    var = tk.StringVar(name=name)
-    ttk.Label(root, text=desc + ':') \
-            .grid(column=0, row=row, sticky=tk.W)
-    entry = ttk.Entry(root, textvariable=var)
-    entry.grid(column=1, row=row, sticky=(tk.W, tk.E))
-    ttk.Button(root, text='Browse...', command=command) \
-            .grid(column=2, row=row)
-    row += 1
-    return var
+    """Create widgets to allow user to specify a file"""
+    tkVar = tk.StringVar(name=name)
+    row = ttk.Frame(root)
+    ttk.Label(row, text=desc + ':', width=25).pack(side=tk.LEFT)
+    ttk.Entry(row, textvariable=tkVar).pack(side=tk.LEFT, fill=tk.X, expand=True)
+    ttk.Button(row, text='Browse...', command=command).pack(side=tk.RIGHT)
+    row.pack(side=tk.TOP, fill=tk.X)
+    return tkVar
 
 def browseJob():
     fullpath = filedialog.askopenfilename(
@@ -200,54 +200,72 @@ def browseUser():
     else:
         userVar.set(fullpath)
 
+# Create user interface to collect file names
 jobVar = addFileRow('job', 'Job to run', browseJob)
 oldjobVar = addFileRow('oldjob', 'Restart from old job', browseOldJob)
 globalVar = addFileRow('global', 'Submodel from global job', browseGlobalJob)
 userVar = addFileRow('user', 'User subroutine', browseUser)
 
+buttonRow = ttk.Frame(root)
+
+# Create button to submit job
+button = ttk.Button(buttonRow, text='Run', command=submit)
+button.pack(side=tk.RIGHT)
+
+# Allow user to specify CPUs
 cpusVar = tk.StringVar(name='cpus')
 cpusVar.set('')  # Use default
-ttk.Label(root, text='CPU cores:').grid(column=0, row=row, sticky=tk.W)
-ttk.Spinbox(root, from_=1, to=100, textvariable=cpusVar) \
-        .grid(column=1, row=row, sticky=(tk.W, tk.E))
-row += 1
+frame = ttk.Frame(buttonRow)
+ttk.Label(frame, text='CPU cores:').pack(side=tk.LEFT)
+ttk.Spinbox(frame, from_=1, to=1000, textvariable=cpusVar, width=4).pack()
+frame.pack(side=tk.LEFT)
 
-licenseVar = tk.StringVar(name='license')
-ttk.Label(root, text='License:').grid(column=0, row=row, sticky=tk.W)
-ttk.Combobox(root,
-    textvariable=licenseVar,
-    values=['Default', 'Extended token (QXT)', 'SimUnit token (SRU)', 'SimUnit credit (SUN'],
-    state='readonly',
-    ).grid(column=1, row=row, sticky=(tk.W, tk.E))
-row += 1
+# Allow user to specify GPUs
+gpusVar = tk.StringVar(name='gpus')
+gpusVar.set('')  # Use default
+frame = ttk.Frame(buttonRow)
+ttk.Label(frame, text='GPUs:').pack(side=tk.LEFT)
+ttk.Spinbox(frame, from_=1, to=100, textvariable=gpusVar, width=4).pack()
+frame.pack(side=tk.LEFT)
 
+# Find all abaqus versions available in the PATH
 versions = set()
-for p in os.getenv('PATH', '').split(os.pathsep):
-    versions.update(glob('abq2*', root_dir=p))
-
+for directory in os.getenv('PATH', '').split(os.pathsep):
+    versions.update(glob('abq2*', root_dir=directory))
+versions=['abaqus'] + [os.path.splitext(abq)[0] for abq in sorted(versions)]
 abaqusVar = tk.StringVar(name='abaqus')
-abaqusVar.set('abaqus')
-ttk.Label(root, text='Version:').grid(column=0, row=row, sticky=tk.W)
-ttk.Combobox(root,
+abaqusVar.set(versions[0])
+ttk.Combobox(buttonRow,
     textvariable=abaqusVar,
-    values=['abaqus'] + [os.path.splitext(p)[0] for p in sorted(versions)],
+    values=versions,
     state='readonly',
-    ).grid(column=1, row=row, sticky=(tk.W, tk.E))
-row += 1
+    ).pack(side=tk.LEFT)
 
-button = ttk.Button(text='Submit', command=submit)
-button.grid(column=1, row=row, sticky=tk.W)
-row += 1
+# Offer license choices
+licenses=['Default license', 'Extended tokens (QXT)', 'SimUnit tokens (SRU)', 'SimUnit credits (SUN)']
+licenseVar = tk.StringVar(name='license')
+licenseVar.set(licenses[0])
+ttk.Combobox(buttonRow,
+    textvariable=licenseVar,
+    values=licenses,
+    state='readonly',
+    ).pack(side=tk.LEFT)
 
+def getHelp():
+    """Open help in browser"""
+    import webbrowser
+    webbrowser.open('https://help.3ds.com')
+ttk.Button(buttonRow, text='Help...', command=getHelp).pack(side=tk.RIGHT)
+
+buttonRow.pack(fill=tk.X)
+
+# Create text widget to display log
 text = scrolledtext.ScrolledText(root)
-text.grid(column=1, row=row, sticky=(tk.W, tk.E, tk.N, tk.S))
+text.pack(side=tk.BOTTOM, fill=tk.BOTH, expand=1)
 h1font = font.nametofont('TkTextFont').actual()
 h1font['size'] = 14
 h1font['weight'] = 'bold'
 text.tag_configure('h1', font=h1font)
-
-root.columnconfigure(1, weight=1)
-root.rowconfigure(row, weight=1)
 
 root.mainloop()
 
