@@ -20,6 +20,12 @@ def submit():
     from threading import Thread
     global process
     fullpath = jobVar.get()
+    if not fullpath:
+        showerror(
+            title='Missing input file',
+            message='You must specify an Abaqus job to run',
+            )
+        return
     if not os.path.isfile(fullpath):
         showerror(
             title='File not found',
