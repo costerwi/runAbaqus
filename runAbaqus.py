@@ -18,29 +18,29 @@ def submit():
     from subprocess import Popen, PIPE, STDOUT
     from threading import Thread
     global process
-    cmd = [abaqusVar.get(), 'interactive']
     fullpath = jobVar.get()
     if not os.path.isfile(fullpath):
         #TODO Error
         return
-    d, fn = path.split(jobVar.get())
+    if text.index(tk.END) > '3.0':
+        text.delete('1.0', tk.END)
+    d, fn = path.split(fullpath)
     if d and d != os.getcwd():
         text.insert(tk.END, 'cd {}\n'.format(d))
         os.chdir(d)
     job, _ = path.splitext(fn)
-    cmd.extend(['job=' + job])
+    cmd = [abaqusVar.get(), 'interactive', 'job=' + job]
     oldjob, _ = path.splitext(oldjobVar.get())
     if oldjob:
-        cmd.extend(['oldjob=' + oldjob])
+        cmd.append('oldjob=' + oldjob)
     globalmodel, _ = path.splitext(globalVar.get())
     if globalmodel:
-        cmd.extend(['global=' + globalmodel])
+        cmd.append('global=' + globalmodel)
     user = userVar.get()
     if user:
-        cmd.extend(['user=' + globalmodel])
+        cmd.append('user=' + globalmodel)
     cpus = cpusVar.get()
     if cpus:
-        cmd.extend(['cpus=' + cpus])
         cmd.append('cpus=' + cpus)
     license = licenseVar.get()
     if 'QXT' in license:
