@@ -220,7 +220,8 @@ abaqusVar.set('abaqus')
 ttk.Label(root, text='Version:').grid(column=0, row=row, sticky=tk.W)
 ttk.Combobox(root,
     textvariable=abaqusVar,
-    values=[os.path.splitext(p)[0] for p in sorted(versions)],
+    values=['abaqus'] + [os.path.splitext(p)[0] for p in sorted(versions)],
+    state='readonly',
     ).grid(column=1, row=row, sticky=(tk.W, tk.E))
 row += 1
 
