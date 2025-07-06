@@ -40,7 +40,20 @@ def submit():
     cpus = cpusVar.get()
     if cpus:
         cmd.extend(['cpus=' + cpus])
-    text.insert(tk.END, ' '.join(cmd) + '\n')
+        cmd.append('cpus=' + cpus)
+    license = licenseVar.get()
+    if 'QXT' in license:
+        cmd.append('license_model=LEGACY')
+        cmd.append('license_type=TOKEN')
+    elif 'SRU' in license:
+        cmd.append('license_model=SIMUNIT')
+        cmd.append('license_type=TOKEN')
+    elif 'SUN' in license:
+        cmd.append('license_model=SIMUNIT')
+        cmd.append('license_type=CREDIT')
+
+    text.insert(tk.END, ' '.join(cmd) + '\n\n')
+    text.yview(tk.END)
     button['text'] = 'Terminate'
     button['command'] = terminate
     process = Popen(cmd, stdout=PIPE, stderr=STDOUT, shell=True, text=True)
@@ -137,6 +150,15 @@ cpusVar.set('')  # Use default
 ttk.Label(root, text='CPU cores:').grid(column=0, row=row, sticky=tk.W)
 ttk.Spinbox(root, from_=1, to=100, textvariable=cpusVar) \
         .grid(column=1, row=row, sticky=(tk.W, tk.E))
+row += 1
+
+licenseVar = tk.StringVar(name='license')
+ttk.Label(root, text='License:').grid(column=0, row=row, sticky=tk.W)
+ttk.Combobox(root,
+    textvariable=licenseVar,
+    values=['Default', 'Extended token (QXT)', 'SimUnit token (SRU)', 'SimUnit credit (SUN'],
+    state='readonly',
+    ).grid(column=1, row=row, sticky=(tk.W, tk.E))
 row += 1
 
 versions = set()
