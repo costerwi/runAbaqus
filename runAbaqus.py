@@ -15,7 +15,7 @@ root.title('Run Abaqus')
 process = None
 
 def submit():
-    from subprocess import Popen, PIPE, STDOUT
+    import subprocess
     from threading import Thread
     global process
     fullpath = jobVar.get()
@@ -57,7 +57,18 @@ def submit():
     text.yview(tk.END)
     button['text'] = 'Terminate'
     button['command'] = terminate
-    process = Popen(cmd, stdout=PIPE, stderr=STDOUT, shell=True, text=True)
+
+    options = {}
+    if os.name == 'nt':
+        options['creationflags'] = subprocess.CREATE_NEW_PROCESS_GROUP
+    process = subprocess.Popen(
+        cmd,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        shell=True,
+        text=True,
+        start_new_session=True,
+        **options)
     Thread(target=readOutput, daemon=True).start()
 
 
