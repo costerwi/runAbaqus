@@ -78,6 +78,7 @@ def submit():
     commandButton['text'] = 'Stop'
     commandButton['command'] = terminate
 
+    cmd[0] = versions[cmd[0]]  # expand to full path
     options = {}
     if os.name == 'nt':
         options['creationflags'] = subprocess.CREATE_NEW_PROCESS_GROUP
@@ -85,7 +86,6 @@ def submit():
         cmd,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
-        shell=True,
         text=True,
         start_new_session=True,
         **options)
@@ -271,15 +271,22 @@ ttk.Spinbox(frame, from_=1, to=100, textvariable=gpusVar, width=4).pack()
 frame.pack(side=tk.LEFT)
 
 # Find all abaqus versions available in the PATH
-versions = set()
+versions = {}
 for directory in os.getenv('PATH', '').split(os.pathsep):
-    versions.update(glob('abq2*', root_dir=directory))
-versions=['abaqus'] + [os.path.splitext(abq)[0] for abq in sorted(versions)]
+    for cmd in 'abaqus*', 'abq2*':
+        for fullpath in glob(os.path.join(directory, cmd)):
+            if not os.path.isfile(fullpath):
+                continue  # must be a file
+            _, filename = os.path.split(fullpath)
+            basename, _ = os.path.splitext(fn)
+            versions[basename] = fullpath
+versionList=list(sorted(versions))
 abaqusVar = tk.StringVar(name='abaqus')
-abaqusVar.set(versions[0])
+if len(versions):
+    abaqusVar.set(versionList[0])
 ttk.Combobox(buttonRow,
     textvariable=abaqusVar,
-    values=versions,
+    values=versionList,
     state='readonly',
     ).pack(side=tk.LEFT)
 
