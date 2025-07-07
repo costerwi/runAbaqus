@@ -226,7 +226,7 @@ def browseUser():
             title='Select custom user subroutine',
             initialdir=d or os.getcwd(),
             filetypes=[
-                ('Fortran files', '.f .for'),
+                ('Fortran files', '.f .for .f77 .f90'),
                 ('c++ files', '.c .cc'),
                 ('Compiled files', '.o .obj'),
                 ('All files', '.*'),
