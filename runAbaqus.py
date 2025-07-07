@@ -16,6 +16,8 @@ __version__ = '0.1.0'
 
 root = tk.Tk()
 root.title('Run Abaqus ' + __version__)
+style = ttk.Style()
+style.configure('command.TButton', background='blue')
 
 process = None # process running the solver
 
@@ -235,7 +237,8 @@ userVar = addFileRow('user', 'User subroutine', browseUser)
 buttonRow = ttk.Frame(root)
 
 # Create button to submit job
-commandButton = ttk.Button(buttonRow, text='Run', command=submit)
+commandButton = ttk.Button(buttonRow, text='Run', command=submit,
+                           style='command.TButton')
 commandButton.pack(side=tk.RIGHT)
 
 # Allow user to specify CPUs
