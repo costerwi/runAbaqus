@@ -56,7 +56,7 @@ def submit():
         cmd.append('global=' + globalmodel)
     user = userVar.get()
     if user:
-        cmd.append('user=' + globalmodel)
+        cmd.append('user=' + user)
     cpus = cpusVar.get()
     if cpus:
         cmd.append('cpus=' + cpus)
