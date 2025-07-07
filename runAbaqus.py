@@ -53,9 +53,9 @@ def submit():
     oldjob, _ = os.path.splitext(oldjobVar.get())
     if oldjob:
         cmd.append('oldjob=' + oldjob)
-    globalmodel, _ = os.path.splitext(globalVar.get())
+    globalmodel = globalVar.get()
     if globalmodel:
-        cmd.append('global=' + globalmodel)
+        cmd.append('globalmodel=' + globalmodel)
     user = userVar.get()
     if user:
         cmd.append('user=' + user)
@@ -207,7 +207,7 @@ def browseGlobalJob():
     fullpath = filedialog.askopenfilename(
             title='Select global model results',
             initialdir=os.getcwd(),
-            filetypes=[('Abaqus output files', '.odb')])
+            filetypes=[('Abaqus results', '.fil .odb .sim')])
     if not fullpath:
         return # cancelled
     d, fn = os.path.split(fullpath)
