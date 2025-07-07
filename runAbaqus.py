@@ -1,3 +1,4 @@
+#!/bin/env python3
 """runAbaqus GUI interface to most common Abaqus solver parameters
 
 Carl Osterwisch, July 2025
