@@ -83,48 +83,67 @@ def submit():
         text=True,
         start_new_session=True,
         **options)
-    Thread(target=monitorJob, daemon=True).start()  # monitor in a non-blocking Thread
+    Thread(target=monitorJob, args=[job], daemon=True).start()  # monitor in a non-blocking Thread
 
 
-def monitorJob():
-    """Monitor running process and echo data to scrolledtext"""
-    fullpath = jobVar.get()
-    d, fn = os.path.split(fullpath)
-    job, _ = os.path.splitext(fn)
+def monitorJob(job):
+    """Monitor running process and echo output to scrolledtext"""
+    from threading import Thread
+    sta = None
     with open(job + '.log', 'w') as logfile:
+        text.insert(tk.END, logfile.name + '\n', ('h1',))
         for line in process.stdout:
             text.insert(tk.END, line)
             text.yview(tk.END)
             print(line, file=logfile, flush=True, end='')  # also echo to log file
-    # Process is finished here. Summarize output
-    if os.path.isfile(job + '.sta'):
-        text.insert(tk.END, '\n')
-        with open(job + '.sta') as sta:
-            text.insert(tk.END, '\n{}\n'.format(sta.name), ('h1',))
-            for line in sta:
-                text.insert(tk.END, line)
-                text.yview(tk.END)
-    for ext in '.msg', '.dat':
+            if not sta and line.startswith('Run standard'):
+                # start real-time sta file monitor for Standard jobs
+                sta = Thread(target=monitorSta, args=[job])
+                sta.start()
+    if sta:
+        sta.join()  # wait for monitorSta to complete
+    for ext in '.dat', '.msg':  # Files to scan for errors
         fn = job + ext
         if not os.path.isfile(fn):
             continue
-        text.insert(tk.END, '\n')
         with open(fn) as out:
-            heading = False
+            heading = None
+            previousError = False
             for line in out:
-                if line.startswith(' ***ERROR:') or line.startswith('           ') and previous:
+                if line.startswith(' ***ERROR:') or line.startswith('           ') and previousError:
                     if not heading:
-                        text.insert(tk.END, '\n{}\n'.format(fn), ('h1',))
-                        heading = True
-                    text.insert(tk.END, line)
+                        heading = '\n{} errors\n'.format(fn)
+                        text.insert(tk.END, heading, ('h1', 'err'))
+                    text.insert(tk.END, line, ('err',))
                     text.yview(tk.END)
-                    previous = True
+                    previousError = True
                 else:
-                    previous = False
-        if heading:
-            break
+                    previousError = False
     commandButton['text'] = 'Run'
     commandButton['command'] = submit
+
+
+def monitorSta(job):
+    """Monitor sta file and echo output to scrolledtext"""
+    import time
+    fn = job + '.sta'
+    while process.poll() is None and not os.path.isfile(fn):
+        # waiting for sta file
+        time.sleep(5)
+    if not os.path.isfile(fn):
+        return
+    with open(fn) as sta:
+        heading = '\n{}\n'.format(fn)
+        text.insert(tk.END, heading, ('h1', 'sta'))
+        while True:
+            line = sta.readline()
+            if line:
+                text.insert(tk.END, line, ('sta',))
+                text.yview(tk.END)
+            else:
+                if process.poll() != None:
+                    break  # process is finished
+                time.sleep(2)
 
 
 def terminate():
@@ -267,6 +286,9 @@ h1font = font.nametofont('TkTextFont').actual()
 h1font['size'] = 14
 h1font['weight'] = 'bold'
 text.tag_configure('h1', font=h1font)
+text.tag_configure('sta', background='lightcyan1')
+text.tag_configure('err', background='mistyrose1')
+
 
 root.mainloop()
 
