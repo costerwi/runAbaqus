@@ -69,8 +69,8 @@ def submit():
 
     text.insert(tk.END, ' '.join(cmd) + '\n\n')
     text.yview(tk.END)
-    button['text'] = 'Terminate'
-    button['command'] = terminate
+    commandButton['text'] = 'Terminate'
+    commandButton['command'] = terminate
 
     options = {}
     if os.name == 'nt':
@@ -123,8 +123,8 @@ def monitorJob():
                     previous = False
         if heading:
             break
-    button['text'] = 'Submit'
-    button['command'] = submit
+    commandButton['text'] = 'Run'
+    commandButton['command'] = submit
 
 
 def terminate():
@@ -210,8 +210,8 @@ userVar = addFileRow('user', 'User subroutine', browseUser)
 buttonRow = ttk.Frame(root)
 
 # Create button to submit job
-button = ttk.Button(buttonRow, text='Run', command=submit)
-button.pack(side=tk.RIGHT)
+commandButton = ttk.Button(buttonRow, text='Run', command=submit)
+commandButton.pack(side=tk.RIGHT)
 
 # Allow user to specify CPUs
 cpusVar = tk.StringVar(name='cpus')
