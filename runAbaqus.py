@@ -210,7 +210,7 @@ def browseOldJob():
         oldjobVar.set(fullpath)
 
 def browseGlobalJob():
-    d, fn = os.path.split(oldjobVar.get())
+    d, fn = os.path.split(globalVar.get())
     fullpath = filedialog.askopenfilename(
             title='Select global model results',
             initialdir=d or os.getcwd(),
@@ -224,7 +224,7 @@ def browseGlobalJob():
         globalVar.set(fullpath)
 
 def browseUser():
-    d, fn = os.path.split(oldjobVar.get())
+    d, fn = os.path.split(userVar.get())
     fullpath = filedialog.askopenfilename(
             title='Select custom user subroutine',
             initialdir=d or os.getcwd(),
@@ -279,7 +279,7 @@ for directory in os.getenv('PATH', '').split(os.pathsep):
             if not os.path.isfile(fullpath):
                 continue  # must be a file
             _, filename = os.path.split(fullpath)
-            basename, _ = os.path.splitext(fn)
+            basename, _ = os.path.splitext(filename)
             versions[basename] = fullpath
 versionList=list(sorted(versions))
 abaqusVar = tk.StringVar(name='abaqus')
