@@ -75,7 +75,7 @@ def submit():
 
     text.insert(tk.END, ' '.join(cmd) + '\n\n')
     text.yview(tk.END)
-    commandButton['text'] = 'Terminate'
+    commandButton['text'] = 'Stop'
     commandButton['command'] = terminate
 
     options = {}
@@ -155,12 +155,16 @@ def monitorSta(job):
 def terminate():
     """Kill the running process (if any)"""
     import signal
-    if hasattr(process, 'terminate'):
-        text.insert(tk.END, 'Terminating...')
+    if process.poll() is None:
+        text.insert(tk.END, 'Stopping...\n', ('err',))
         text.yview(tk.END)
-        if hasattr(signal, 'CTRL_BREAK_EVENT'):  # only on Windows
+        if os.name == 'nt':
             process.send_signal(signal.CTRL_BREAK_EVENT)
+        else:
+            os.killpg(os.getpgid(process.pid), signal.SIGTERM)
         process.terminate()
+    else:
+        text.insert(tk.END, 'Waiting for final log messages...', ('err',))
 
 
 def addFileRow(name, desc, command):
