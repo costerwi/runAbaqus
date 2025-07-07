@@ -271,7 +271,8 @@ ttk.Combobox(buttonRow,
     ).pack(side=tk.LEFT)
 
 # Offer license choices
-licenses=['Default license', 'Extended tokens (QXT)', 'SimUnit tokens (SRU)', 'SimUnit credits (SUN)']
+licenses=['Default license type', 'Extended tokens (QXT)',
+          'SimUnit tokens (SRU)', 'SimUnit credits (SUN)']
 licenseVar = tk.StringVar(name='license')
 licenseVar.set(licenses[0])
 ttk.Combobox(buttonRow,
@@ -291,7 +292,7 @@ buttonRow.pack(fill=tk.X)
 # Create text widget to display log
 text = scrolledtext.ScrolledText(root)
 text.pack(side=tk.BOTTOM, fill=tk.BOTH, expand=1)
-h1font = font.nametofont('TkTextFont').actual()
+h1font = font.Font(font='TkTextFont')
 h1font['size'] = 14
 h1font['weight'] = 'bold'
 text.tag_configure('h1', font=h1font)
