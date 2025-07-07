@@ -177,6 +177,7 @@ def addFileRow(name, desc, command):
 
 def browseJob():
     fullpath = filedialog.askopenfilename(
+            title='Select Abaqus job to run',
             filetypes=[
                 ('Abaqus models', '.inp'),
                 ('All files', '.*'),
@@ -186,12 +187,13 @@ def browseJob():
     d, fn = os.path.split(fullpath)
     text.delete('1.0', tk.END)
     text.insert(tk.END, 'cd {}\n'.format(d))
-    text.yview(tk.END)
     os.chdir(d)
     jobVar.set(fn)
 
 def browseOldJob():
     fullpath = filedialog.askopenfilename(
+            title='Select old job to restart from',
+            initialdir=os.getcwd(),
             filetypes=[('Abaqus restart files', '.res')])
     if not fullpath:
         return # cancelled
@@ -203,6 +205,8 @@ def browseOldJob():
 
 def browseGlobalJob():
     fullpath = filedialog.askopenfilename(
+            title='Select global model results',
+            initialdir=os.getcwd(),
             filetypes=[('Abaqus output files', '.odb')])
     if not fullpath:
         return # cancelled
@@ -214,6 +218,8 @@ def browseGlobalJob():
 
 def browseUser():
     fullpath = filedialog.askopenfilename(
+            title='Select custom user subroutine',
+            initialdir=os.getcwd(),
             filetypes=[
                 ('Fortran files', '.f .for'),
                 ('c++ files', '.c .cc'),
