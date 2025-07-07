@@ -16,8 +16,6 @@ __version__ = '0.1.0'
 
 root = tk.Tk()
 root.title('Run Abaqus ' + __version__)
-style = ttk.Style()
-style.configure('command.TButton', background='blue')
 
 process = None # process running the solver
 
@@ -303,6 +301,12 @@ buttonRow.pack(fill=tk.X)
 # Create text widget to display log
 text = scrolledtext.ScrolledText(root)
 text.pack(side=tk.BOTTOM, fill=tk.BOTH, expand=1)
+
+cmdfont = font.Font(font='TkButtonFont')
+cmdfont['weight'] = 'bold'
+style = ttk.Style()
+style.configure('command.TButton', font=cmdfont)
+
 h1font = font.Font(font='TkTextFont')
 h1font['size'] = 14
 h1font['weight'] = 'bold'
