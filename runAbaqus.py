@@ -1,5 +1,9 @@
-from __future__ import print_function
+"""runAbaqus GUI interface to most common Abaqus solver parameters
 
+Carl Osterwisch, July 2025
+"""
+
+from __future__ import print_function
 from glob import glob
 import os
 import tkinter as tk
@@ -8,8 +12,10 @@ from tkinter import font
 from tkinter import filedialog
 from tkinter import scrolledtext
 
+__version__ = '0.1.0'
+
 root = tk.Tk()
-root.title('Run Abaqus')
+root.title('Run Abaqus ' + __version__)
 
 process = None # process running the solver
 
