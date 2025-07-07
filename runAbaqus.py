@@ -267,7 +267,7 @@ gpusVar = tk.StringVar(name='gpus')
 gpusVar.set('')  # Use default
 frame = ttk.Frame(buttonRow)
 ttk.Label(frame, text='GPUs:').pack(side=tk.LEFT)
-ttk.Spinbox(frame, from_=1, to=100, textvariable=gpusVar, width=4).pack()
+ttk.Spinbox(frame, from_=0, to=100, textvariable=gpusVar, width=4).pack()
 frame.pack(side=tk.LEFT)
 
 # Find all abaqus versions available in the PATH
