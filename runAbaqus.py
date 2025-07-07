@@ -156,12 +156,12 @@ def monitorSta(job):
 
 def terminate():
     """Kill the running process (if any)"""
-    from signal import CTRL_BREAK_EVENT
+    import signal
     if hasattr(process, 'terminate'):
         text.insert(tk.END, 'Terminating...')
         text.yview(tk.END)
-        if os.name == 'nt':
-            process.send_signal(CTRL_BREAK_EVENT)
+        if hasattr(signal, 'CTRL_BREAK_EVENT'):  # only on Windows
+            process.send_signal(signal.CTRL_BREAK_EVENT)
         process.terminate()
 
 
