@@ -8,7 +8,7 @@ from __future__ import print_function
 from glob import glob
 import os
 import tkinter as tk
-import tkinter.ttk as ttk
+from tkinter import ttk
 from tkinter import font
 from tkinter import filedialog
 from tkinter import scrolledtext
