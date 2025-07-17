@@ -79,6 +79,12 @@ class Dialog():
                 for fullpath in Path(directory).glob(cmd):
                     if not fullpath.is_file():
                         continue  # must be a file
+                    if os.name == 'nt':
+                        if fullpath.suffix != '.bat':
+                            continue  # must be a batch file
+                    else:
+                        if not os.access(fullpath, os.X_OK):
+                            continue  # must be executable
                     self.versions[fullpath.stem] = fullpath
         versionList=list(sorted(self.versions))
         self.abaqusVar = tk.StringVar(name='abaqus')
