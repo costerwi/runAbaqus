@@ -339,7 +339,7 @@ class Dialog():
     def getHelp(self):
         """Open help in browser"""
         import webbrowser
-        webbrowser.open('https://help.3ds.com')
+        webbrowser.open('https://github.com/costerwi/runAbaqus')
 
 
 if __name__ == '__main__':
