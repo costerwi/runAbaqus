@@ -16,3 +16,4 @@ The Run button changes to a <b>Stop</b> button while the job is running.
 The .log and .sta information will be displayed in the lower portion of the runAbaqus window.
 If the job fails to complete then runAbaqus will find and display error messages from the .dat and .msg files.
 
+![image](https://github.com/user-attachments/assets/ca477e6f-2d7d-4bc9-9fd7-2a073dd96155)
