@@ -12,7 +12,7 @@ from tkinter.font import Font
 from tkinter.filedialog import askopenfilename
 from tkinter.scrolledtext import ScrolledText
 
-__version__ = '0.1.0'
+__version__ = '0.2.0'
 
 
 class App(tk.Tk):
@@ -51,10 +51,15 @@ class Dialog():
 
         buttonRow = ttk.Frame(container)
 
-        # Create button to submit job
-        self.commandButton = ttk.Button(buttonRow, text='Run', command=self.submit,
-                                   style='command.TButton')
-        self.commandButton.pack(side=tk.RIGHT)
+        # Types of analysis
+        analysis = ('Full analysis', 'Datacheck', 'Continue from datacheck')
+        self.analysisVar = tk.StringVar(name='analysis')
+        self.analysisVar.set(analysis[0])
+        ttk.Combobox(buttonRow,
+            textvariable=self.analysisVar,
+            values=analysis,
+            state='readonly',
+            ).pack(side=tk.LEFT)
 
         # Allow user to specify CPUs
         self.cpusVar = tk.StringVar(name='cpus')
@@ -71,6 +76,15 @@ class Dialog():
         ttk.Label(frame, text='GPUs:').pack(side=tk.LEFT)
         ttk.Spinbox(frame, from_=0, to=100, textvariable=self.gpusVar, width=4).pack()
         frame.pack(side=tk.LEFT)
+
+        buttonRow.pack(fill=tk.X)
+
+        buttonRow = ttk.Frame(container)
+
+        # Create button to submit job
+        self.commandButton = ttk.Button(buttonRow, text='Run', command=self.submit,
+                                   style='command.TButton')
+        self.commandButton.pack(side=tk.RIGHT)
 
         # Find all abaqus versions available in the PATH
         self.versions = {}
@@ -160,6 +174,11 @@ class Dialog():
         gpus = self.gpusVar.get().strip()
         if gpus:
             cmd.append('gpus=' + gpus)
+        analysis = self.analysisVar.get().lower()
+        if analysis.startswith('datacheck'):
+            cmd.append('datacheck')
+        elif analysis.startswith('continue'):
+            cmd.append('continue')
         license = self.licenseVar.get().strip()
         if 'QXT' in license:
             cmd.append('license_model=LEGACY')
