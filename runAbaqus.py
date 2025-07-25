@@ -278,7 +278,6 @@ class Dialog():
     def browseJob(self):
         filename = askopenfilename(
                 title='Select Abaqus job to run',
-                initialdir=Path(self.oldjobVar.get()).parent,
                 filetypes=[
                     ('Abaqus models', '.inp'),
                     ('All files', '.*'),
